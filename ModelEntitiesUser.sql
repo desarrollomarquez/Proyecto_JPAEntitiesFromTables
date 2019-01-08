@@ -1,68 +1,76 @@
-﻿DROP TABLE IF EXISTS usuario_rol CASCADE;
-DROP TABLE IF EXISTS rol CASCADE;
-DROP TABLE IF EXISTS  usuario CASCADE;
-DROP TABLE IF EXISTS  persona CASCADE;
-DROP TABLE IF EXISTS  tipo_documento CASCADE;
+﻿--CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+--SELECT md5(random()::text || clock_timestamp()::text)::uuid
+
+--CREATE EXTENSION "pgcrypto";
+--SELECT gen_random_uuid()
+
+
+DROP TABLE IF EXISTS  Usuario_Rol CASCADE;
+DROP TABLE IF EXISTS  Rol CASCADE;
+DROP TABLE IF EXISTS  Usuario CASCADE;
+DROP TABLE IF EXISTS  Persona CASCADE;
+DROP TABLE IF EXISTS  TipoDocumento CASCADE;
 
 
 /*
-    *********************************** Tabla tipo_documento ***********************************
+    *********************************** Tabla TipoDocumento ***********************************
 */
 
-CREATE TABLE tipo_documento (
-  id        SERIAL,
-  nombre    VARCHAR NULL,
-  create_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP(0),
-  update_at TIMESTAMP,
-  PRIMARY KEY (id)
+CREATE TABLE TipoDocumento (
+  Codigo_id 	UUID DEFAULT gen_random_uuid(),
+  Nombre    	VARCHAR NULL,
+  Create_at 	TIMESTAMP DEFAULT CURRENT_TIMESTAMP(0),
+  Update_at 	TIMESTAMP,
+  PRIMARY KEY (Codigo_id)
 );
 
 
 /*
-    *********************************** Tabla persona ***********************************
+    *********************************** Tabla Persona ***********************************
 */
 
-CREATE TABLE persona (
-  id                      serial,
-  identificacion          INTEGER      NULL,
-  id_tipo_documento       INTEGER      NULL,
-  nombres                 VARCHAR(100) NOT NULL,
-  apellidos               VARCHAR(100) NOT NULL,
-  correo                  VARCHAR(100) NULL UNIQUE,
-  descripcion_profesional TEXT         NULL,
-  create_at               TIMESTAMP DEFAULT CURRENT_TIMESTAMP(0),
-  update_at               TIMESTAMP,
-  PRIMARY KEY (id),
-  CONSTRAINT fk_persona_tipo_documento FOREIGN KEY (id_tipo_documento) REFERENCES tipo_documento (id) ON DELETE CASCADE
+CREATE TABLE Persona (
+  Codigo_id 		  UUID DEFAULT gen_random_uuid(),
+  NumeroId	          INTEGER      NULL,
+  Nombres                 VARCHAR(100) NOT NULL,
+  Apellidos               VARCHAR(100) NOT NULL,
+  Descripcion 		  TEXT         NULL,
+  TipoDocumento_id        UUID      NULL,
+  Create_at               TIMESTAMP DEFAULT CURRENT_TIMESTAMP(0),
+  Update_at               TIMESTAMP,
+  PRIMARY KEY (Codigo_id),
+  CONSTRAINT fk_persona_tipodocumento FOREIGN KEY (TipoDocumento_id) REFERENCES TipoDocumento (Codigo_id) ON DELETE CASCADE
 );
 
 /*
-    *********************************** Tabla usuario ***********************************
+    *********************************** Tabla Usuario ***********************************
 */
 
-CREATE TABLE usuario (
-  id_persona INTEGER      NOT NULL,
-  password   varchar(100) NOT NULL,
-  password_decrip   varchar(100) NULL,
-  estado     boolean DEFAULT false,
-  create_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP(0),
-  update_at  TIMESTAMP,
-  PRIMARY KEY (id_persona),
-  CONSTRAINT fk_usuario_persona FOREIGN KEY (id_persona) REFERENCES persona (id) ON DELETE CASCADE
+CREATE TABLE Usuario (
+  Codigo_id 		  UUID DEFAULT gen_random_uuid(),
+  Email                   VARCHAR(100) NULL UNIQUE,
+  Password   		  VARCHAR(100) NOT NULL,
+  Password_decrip         VARCHAR(100) NULL,
+  Estado     		  BOOLEAN DEFAULT false,
+  Persona_id	 	  UUID      NOT NULL,
+  Create_at  		  TIMESTAMP DEFAULT CURRENT_TIMESTAMP(0),
+  Update_at  		  TIMESTAMP,
+  PRIMARY KEY (Codigo_id),
+  CONSTRAINT fk_usuario_persona FOREIGN KEY (Persona_id) REFERENCES Persona (Codigo_id) ON DELETE CASCADE
 );
 
 /*
-    *********************************** Tabla rol ***********************************
+    *********************************** Tabla Rol ***********************************
 */
 
-CREATE TABLE rol (
-  id          SERIAL,
-  nombre      VARCHAR(200) NOT NULL,
-  estado      BOOLEAN   DEFAULT FALSE,
-  descripcion TEXT         NULL,
-  create_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP(0),
-  update_at   TIMESTAMP,
-  PRIMARY KEY (id)
+CREATE TABLE Rol (
+  Codigo_id   UUID DEFAULT gen_random_uuid(),
+  Nombre      VARCHAR(200) NOT NULL,
+  Estado      BOOLEAN   DEFAULT FALSE,
+  Descripcion TEXT         NULL,
+  Create_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP(0),
+  Update_at   TIMESTAMP,
+  PRIMARY KEY (Codigo_id)
 );
 
 
@@ -70,13 +78,13 @@ CREATE TABLE rol (
     *********************************** Tabla usuario_rol ***********************************
 */
 
-CREATE TABLE usuario_rol (
-  id_usuario      INTEGER NOT NULL,
-  id_rol          INTEGER NOT NULL,
-  fecha_caducidad TIMESTAMP DEFAULT CURRENT_TIMESTAMP(0),
-  create_at       TIMESTAMP DEFAULT CURRENT_TIMESTAMP(0),
-  update_at TIMESTAMP,
-  PRIMARY KEY (id_usuario, id_rol),
-  CONSTRAINT fk_user_rol_users FOREIGN KEY (id_usuario) REFERENCES usuario (id_persona) ON DELETE CASCADE ,
-  CONSTRAINT fk_user_rol_rol FOREIGN KEY (id_rol) REFERENCES rol (id) ON DELETE CASCADE
+CREATE TABLE Usuario_Rol (
+  Usuario_id      UUID NOT NULL,
+  Rol_id          UUID NOT NULL,
+  Fcaducidad 	  TIMESTAMP,
+  Create_at       TIMESTAMP DEFAULT CURRENT_TIMESTAMP(0),
+  Update_at TIMESTAMP,
+  PRIMARY KEY (Usuario_id, Rol_id),
+  CONSTRAINT fk_user_rol_users FOREIGN KEY (Usuario_id) REFERENCES Usuario (Codigo_id) ON DELETE CASCADE ,
+  CONSTRAINT fk_user_rol_rol FOREIGN KEY (Rol_id) REFERENCES Rol (Codigo_id) ON DELETE CASCADE
 );
